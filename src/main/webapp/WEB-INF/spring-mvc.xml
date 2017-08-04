@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                            http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+                            http://www.springframework.org/schema/context
+                            http://www.springframework.org/schema/context/spring-context-3.1.xsd
+                            http://www.springframework.org/schema/mvc
+                            http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+
+    <description>spring web层配置</description>
+
+    <context:component-scan base-package="com.wbliu.cecdemo.userManager"/>
+
+    <!-- don't handle the static resource -->
+    <mvc:default-servlet-handler/>
+
+    <!-- if you use annotation you must configure following setting -->
+    <mvc:annotation-driven/>
+
+    <!-- configure the InternalResourceViewResolver -->
+    <bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/><!-- prefix -->
+        <property name="suffix" value=".jsp"/><!-- suffix -->
+    </bean>
+
+    <!-- rest json related... start -->
+    <bean id="mappingJacksonHttpMessageConverter"
+          class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+                <value>application/json;charset=UTF-8</value>
+            </list>
+        </property>
+    </bean>
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <ref bean="mappingJacksonHttpMessageConverter"/>
+            </list>
+        </property>
+    </bean>
+    <!-- rest json related... end -->
+
+
+    <!--配置拦截器-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/users/**"/>
+            <mvc:mapping path="/workflow/**"/>
+            <mvc:exclude-mapping path="/workflow/create"/>
+            <mvc:exclude-mapping path="/users/login"/>
+            <bean class="com.wbliu.cecdemo.userManager.security.interceptor.CheckAccessTokenInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+</beans>
